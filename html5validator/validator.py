@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import fnmatch
+import json
 import logging
 import os
 import re
@@ -192,3 +193,27 @@ class Validator(object):
         else:
             LOGGER.info('All good.')
         return len(e)
+
+    def get_messages(self, files):
+        """
+        Validate one or more files and return a list of messages.
+
+        Each message is returned as a dictionary containing some or
+        all of the following keys:
+         - "type"
+         - "subtype"
+         - "message"
+         - "extract"
+         - "offset"
+         - "url"
+         - "firstLine"
+         - "firstColumn"
+         - "lastLine"
+         - "lastColumn"
+
+        Details of this format are documented at:
+        https://github.com/validator/validator/wiki/Output-%C2%BB-JSON
+        """
+        stderr = self._run_validator(files, format='json')
+        json_data = json.loads(stderr)
+        return json_data['messages']
