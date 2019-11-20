@@ -79,16 +79,19 @@ class Validator(object):
 
         return java_options
 
-    def _vnu_options(self):
+    def _vnu_options(self, format=None):
+        if format is None:
+            format = self.format
+
         vnu_options = []
 
         if self.errors_only:
             vnu_options.append('--errors-only')
         if not self.detect_language:
             vnu_options.append('--no-langdetect')
-        if self.format is not None:
+        if format is not None:
             vnu_options.append('--format')
-            vnu_options.append(self.format)
+            vnu_options.append(format)
         if self.vnu_args is not None:
             vnu_options += self.vnu_args
 
@@ -132,14 +135,14 @@ class Validator(object):
 
         return files
 
-    def validate(self, files):
+    def _run_validator(self, files, format=None):
         if sys.platform == 'cygwin':
             files = [self._cygwin_path_convert(f) for f in files]
 
         try:
             cmd = (['java'] + self._java_options()
                    + ['-jar', self.vnu_jar_location]
-                   + self._vnu_options()
+                   + self._vnu_options(format)
                    + files)
             LOGGER.debug(cmd)
             p = subprocess.Popen(
@@ -158,6 +161,11 @@ class Validator(object):
 
         # process fancy quotes into standard quotes
         stderr = self._normalize_string(stderr.decode('utf-8'))
+
+        return stderr
+
+    def validate(self, files):
+        stderr = self._run_validator(files)
 
         e = stderr.splitlines()
 
