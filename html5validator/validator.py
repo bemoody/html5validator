@@ -15,7 +15,6 @@ import vnujar
 LOGGER = logging.getLogger(__name__)
 
 DEFAULT_IGNORE_RE = [
-    r'\APicked up _JAVA_OPTIONS:.*',
     r'\ADocument checking completed. No errors found.*',
 ]
 
@@ -28,6 +27,8 @@ DEFAULT_IGNORE_XML = [
     '<?xml version=\'1.0\' encoding=\'utf-8\'?>',
     '<messages xmlns="http://n.validator.nu/messages/">'
 ]
+
+STDERR_IGNORE_RE = '^Picked up (?:_JAVA_OPTIONS|JAVA_TOOL_OPTIONS):.*\n'
 
 
 class JavaNotFoundException(Exception):
@@ -161,6 +162,10 @@ class Validator(object):
             raise (error.output.decode('utf-8'))
 
         stderr = stderr.decode('utf-8')
+
+        # filter out Java cruft
+        stderr = re.sub(STDERR_IGNORE_RE, '', stderr, flags=re.MULTILINE)
+
         if format != 'json':
             # process fancy quotes into standard quotes
             stderr = self._normalize_string(stderr)
