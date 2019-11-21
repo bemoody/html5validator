@@ -159,8 +159,10 @@ class Validator(object):
         except subprocess.CalledProcessError as error:
             raise (error.output.decode('utf-8'))
 
-        # process fancy quotes into standard quotes
-        stderr = self._normalize_string(stderr.decode('utf-8'))
+        stderr = stderr.decode('utf-8')
+        if format != 'json':
+            # process fancy quotes into standard quotes
+            stderr = self._normalize_string(stderr)
 
         return stderr
 
