@@ -38,6 +38,17 @@ class JavaNotFoundException(Exception):
 
 
 class Validator(object):
+    """An object that can be used to validate HTML and other files.
+
+    The constructor accepts the following optional arguments:
+     - ignore: A list of strings to ignore in error messages.
+     - ignore_re: A list of regular expressions to ignore.
+     - errors_only: If true, ignore non-fatal warning messages.
+     - format: Format for output messages, which must be one of
+       'gnu', 'xml', 'json', or 'text'.
+     - stack_size: Maximum stack size for the Java virtual machine.
+     - vnu_args: List of additional arguments to pass to 'vnu.jar'.
+    """
 
     def __init__(self,
                  ignore=None, ignore_re=None,
@@ -173,6 +184,7 @@ class Validator(object):
         return stderr
 
     def validate(self, files):
+        """Validate one or more files and report the number of errors."""
         stderr = self._run_validator(files)
 
         e = stderr.splitlines()
@@ -200,8 +212,7 @@ class Validator(object):
         return len(e)
 
     def get_messages(self, files):
-        """
-        Validate one or more files and return a list of messages.
+        """Validate one or more files and return a list of messages.
 
         Each message is returned as a dictionary containing some or
         all of the following keys:
